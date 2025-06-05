@@ -1,14 +1,45 @@
 services:
-  monguito:
+  mongo1:
     image: mongo:latest
-    container_name: monguito
+    container_name: mongo1
     ports:
       - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: bruno
-      MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
-      - mongo_data:/data/db
+      - mongo1_data:/data/db
+    networks:
+      - mongo-cluster
+    command: ["mongod", "--replSet", "rs0"]
+
+  mongo2:
+    image: mongo:latest
+    container_name: mongo2
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo2_data:/data/db
+    networks:
+      - mongo-cluster
+    command: ["mongod", "--replSet", "rs0"]
+
+
+  mongo3:
+    image: mongo:latest
+    container_name: mongo3
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongo3_data:/data/db
+    networks:
+      - mongo-cluster
+    command: ["mongod", "--replSet", "rs0"]
+
+
 
 volumes:
-  mongo_data:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
+
+networks:
+  mongo-cluster:
+    driver: bridge
