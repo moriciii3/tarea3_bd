@@ -8,7 +8,7 @@ services:
       - mongo1_data:/data/db
     networks:
       - mongo-cluster
-    command: ["mongod", "--replSet", "rs0"]
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
 
   mongo2:
     image: mongo:latest
@@ -19,8 +19,7 @@ services:
       - mongo2_data:/data/db
     networks:
       - mongo-cluster
-    command: ["mongod", "--replSet", "rs0"]
-
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
 
   mongo3:
     image: mongo:latest
@@ -31,9 +30,26 @@ services:
       - mongo3_data:/data/db
     networks:
       - mongo-cluster
-    command: ["mongod", "--replSet", "rs0"]
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
 
-
+  mongo-init:
+    image: mongo:latest
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+    networks:
+      - mongo-cluster
+    command: >
+      bash -c "sleep 10 &&
+      mongosh --host mongo1 --eval 'rs.initiate({
+        _id: \"rs0\",
+        members: [
+          { _id: 0, host: \"mongo1:27017\" },
+          { _id: 1, host: \"mongo2:27017\" },
+          { _id: 2, host: \"mongo3:27017\" }
+        ]
+      })'"
 
 volumes:
   mongo1_data:
